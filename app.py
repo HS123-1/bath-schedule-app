@@ -13,11 +13,13 @@ st.title("お風呂時間最適化アプリ")
 # Firestoreの初期化
 if not firebase_admin._apps:
     try:
-        # Streamlit CloudのSecretsからJSON文字列を読み込む
-        firebase_config_str = st.secrets["firebase"]
-        firebase_config = json.loads(firebase_config_str)
-    except (KeyError, json.JSONDecodeError):
-        st.error("Firebaseの認証情報が正しく設定されていません。")
+        # Streamlit CloudのSecretsから直接辞書を読み込む
+        firebase_config = st.secrets["firebase"]
+    except KeyError:
+        st.error("Firebaseの認証情報が設定されていません。Streamlit CloudのSecretsに'firebase'キーを追加してください。")
+        st.stop()
+    except Exception as e:
+        st.error(f"Firebaseの認証情報の読み込み中にエラーが発生しました: {e}")
         st.stop()
     
     cred = credentials.Certificate(firebase_config)
@@ -423,3 +425,4 @@ if st.session_state.patients:
             st.session_state.no_bath_time_check = False
             save_data()
             st.rerun()
+
